@@ -1,0 +1,138 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: postgresqls.postgres.nakamasato.com
+spec:
+  group: postgres.nakamasato.com
+  names:
+    kind: PostgreSQL
+    listKind: PostgreSQLList
+    plural: postgresqls
+    singular: postgresql
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.host
+      name: Host
+      type: string
+    - jsonPath: .spec.adminUser.name
+      name: AdminUser
+      type: string
+    - jsonPath: .status.connected
+      name: Connected
+      type: boolean
+    - description: The number of PostgreSQLUsers that belongs to the PostgreSQL
+      jsonPath: .status.userCount
+      name: UserCount
+      type: integer
+    - description: The number of PostgreSQLDBs that belongs to the PostgreSQL
+      jsonPath: .status.dbCount
+      name: DBCount
+      type: integer
+    - jsonPath: .status.reason
+      name: Reason
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PostgreSQL is the Schema for the postgreses API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PostgreSQLSpec holds the connection information for the target
+              PostgreSQL server.
+            properties:
+              adminPassword:
+                description: AdminPassword is PostgreSQL password to connect target
+                  server.
+                properties:
+                  name:
+                    description: Secret Name
+                    type: string
+                  type:
+                    description: Secret Type (e.g. gcp, raw, k8s)
+                    enum:
+                    - raw
+                    - gcp
+                    - k8s
+                    type: string
+                required:
+                - name
+                - type
+                type: object
+              adminUser:
+                description: AdminUser is PostgreSQL user to connect target server.
+                properties:
+                  name:
+                    description: Secret Name
+                    type: string
+                  type:
+                    description: Secret Type (e.g. gcp, raw, k8s)
+                    enum:
+                    - raw
+                    - gcp
+                    - k8s
+                    type: string
+                required:
+                - name
+                - type
+                type: object
+              host:
+                description: Host is PostgreSQL server host.
+                type: string
+              port:
+                default: 5432
+                description: Port is PostgreSQL server port.
+                type: integer
+            required:
+            - adminPassword
+            - adminUser
+            - host
+            type: object
+          status:
+            description: PostgreSQLStatus defines the observed state of PostgreSQL
+            properties:
+              connected:
+                description: true if successfully connected to the PostgreSQL server
+                type: boolean
+              dbCount:
+                default: 0
+                description: The number of database in this PostgreSQL
+                format: int32
+                type: integer
+              reason:
+                description: Reason for connection failure
+                type: string
+              userCount:
+                default: 0
+                description: The number of users in this PostgreSQL
+                format: int32
+                type: integer
+            required:
+            - dbCount
+            - userCount
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

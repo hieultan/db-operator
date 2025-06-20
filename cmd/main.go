@@ -36,10 +36,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	mysqlv1alpha1 "github.com/nakamasato/mysql-operator/api/v1alpha1"
-	controllers "github.com/nakamasato/mysql-operator/internal/controller"
-	"github.com/nakamasato/mysql-operator/internal/mysql"
-	"github.com/nakamasato/mysql-operator/internal/secret"
+       mysqlv1alpha1 "github.com/nakamasato/mysql-operator/api/v1alpha1"
+       postgresv1alpha1 "github.com/nakamasato/mysql-operator/api/postgresql/v1alpha1"
+       controllers "github.com/nakamasato/mysql-operator/internal/controller"
+       "github.com/nakamasato/mysql-operator/internal/mysql"
+       pginternal "github.com/nakamasato/mysql-operator/internal/postgres"
+       "github.com/nakamasato/mysql-operator/internal/secret"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -51,8 +53,9 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(mysqlv1alpha1.AddToScheme(scheme))
-	//+kubebuilder:scaffold:scheme
+       utilruntime.Must(mysqlv1alpha1.AddToScheme(scheme))
+       utilruntime.Must(postgresv1alpha1.AddToScheme(scheme))
+       //+kubebuilder:scaffold:scheme
 }
 
 func main() {
@@ -99,21 +102,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	mysqlClients := mysql.MySQLClients{}
+       mysqlClients := mysql.MySQLClients{}
+       postgresClients := pginternal.PostgreSQLClients{}
 
-	if err = (&controllers.MySQLUserReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		MySQLClients: mysqlClients,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "MySQLUser")
-		os.Exit(1)
-	}
-
-	ctx := context.Background()
-	secretManagers := map[string]secret.SecretManager{
-		"raw": secret.RawSecretManager{},
-	}
+       if err = (&controllers.MySQLUserReconciler{
+               Client:       mgr.GetClient(),
+               Scheme:       mgr.GetScheme(),
+               MySQLClients: mysqlClients,
+       }).SetupWithManager(mgr); err != nil {
+               setupLog.Error(err, "unable to create controller", "controller", "MySQLUser")
+               os.Exit(1)
+       }
+       ctx := context.Background()
+       secretManagers := map[string]secret.SecretManager{
+               "raw": secret.RawSecretManager{},
+       }
 	switch adminUserSecretType {
 	case "gcp":
 		if projectId == "" {
@@ -149,14 +152,41 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "MySQL")
 		os.Exit(1)
 	}
-	if err = (&controllers.MySQLDBReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		MySQLClients: mysqlClients,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "MySQLDB")
-		os.Exit(1)
-	}
+        if err = (&controllers.MySQLDBReconciler{
+                Client:       mgr.GetClient(),
+                Scheme:       mgr.GetScheme(),
+                MySQLClients: mysqlClients,
+        }).SetupWithManager(mgr); err != nil {
+                setupLog.Error(err, "unable to create controller", "controller", "MySQLDB")
+                os.Exit(1)
+        }
+       if err = (&controllers.PostgreSQLUserReconciler{
+               Client:            mgr.GetClient(),
+               Scheme:            mgr.GetScheme(),
+               PostgreSQLClients: postgresClients,
+               SecretManagers:    secretManagers,
+       }).SetupWithManager(mgr); err != nil {
+               setupLog.Error(err, "unable to create controller", "controller", "PostgreSQLUser")
+               os.Exit(1)
+       }
+       if err = (&controllers.PostgreSQLReconciler{
+               Client:               mgr.GetClient(),
+               Scheme:               mgr.GetScheme(),
+               PostgreSQLClients:    postgresClients,
+               PostgreSQLDriverName: "postgres",
+               SecretManagers:       secretManagers,
+       }).SetupWithManager(mgr); err != nil {
+               setupLog.Error(err, "unable to create controller", "controller", "PostgreSQL")
+               os.Exit(1)
+       }
+       if err = (&controllers.PostgreSQLDBReconciler{
+               Client:            mgr.GetClient(),
+               Scheme:            mgr.GetScheme(),
+               PostgreSQLClients: postgresClients,
+       }).SetupWithManager(mgr); err != nil {
+               setupLog.Error(err, "unable to create controller", "controller", "PostgreSQLDB")
+               os.Exit(1)
+       }
 
 	// Set index for mysqluser with spec.mysqlName
 	// this is necessary to get MySQLUser/MySQLDB that references a MySQL
@@ -167,12 +197,24 @@ func main() {
 	if err := cache.IndexField(context.TODO(), &mysqlv1alpha1.MySQLUser{}, "spec.mysqlName", indexFunc); err != nil {
 		panic(err)
 	}
-	indexFunc = func(obj client.Object) []string {
-		return []string{obj.(*mysqlv1alpha1.MySQLDB).Spec.MysqlName}
-	}
-	if err := cache.IndexField(context.TODO(), &mysqlv1alpha1.MySQLDB{}, "spec.mysqlName", indexFunc); err != nil {
-		panic(err)
-	}
+       indexFunc = func(obj client.Object) []string {
+               return []string{obj.(*mysqlv1alpha1.MySQLDB).Spec.MysqlName}
+       }
+       if err := cache.IndexField(context.TODO(), &mysqlv1alpha1.MySQLDB{}, "spec.mysqlName", indexFunc); err != nil {
+               panic(err)
+       }
+       indexFunc = func(obj client.Object) []string {
+               return []string{obj.(*postgresv1alpha1.PostgreSQLUser).Spec.PostgresqlName}
+       }
+       if err := cache.IndexField(context.TODO(), &postgresv1alpha1.PostgreSQLUser{}, "spec.postgresqlName", indexFunc); err != nil {
+               panic(err)
+       }
+       indexFunc = func(obj client.Object) []string {
+               return []string{obj.(*postgresv1alpha1.PostgreSQLDB).Spec.PostgresqlName}
+       }
+       if err := cache.IndexField(context.TODO(), &postgresv1alpha1.PostgreSQLDB{}, "spec.postgresqlName", indexFunc); err != nil {
+               panic(err)
+       }
 
 	//+kubebuilder:scaffold:builder
 

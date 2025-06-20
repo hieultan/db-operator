@@ -99,3 +99,81 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqldbs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqldbs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqldbs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqls
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqls/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqls/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqlusers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqlusers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - postgres.nakamasato.com
+  resources:
+  - postgresqlusers/status
+  verbs:
+  - get
+  - patch
+  - update

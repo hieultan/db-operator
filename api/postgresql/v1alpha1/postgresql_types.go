@@ -25,38 +25,38 @@ import (
 // PostgreSQLSpec holds the connection information for the target PostgreSQL server.
 type PostgreSQLSpec struct {
 
-        // Host is PostgreSQL server host.
-        Host string `json:"host"`
+	// Host is PostgreSQL server host.
+	Host string `json:"host"`
 
-        //+kubebuilder:default=5432
+	//+kubebuilder:default=5432
 
-        // Port is PostgreSQL server port.
-        Port int16 `json:"port,omitempty"`
+	// Port is PostgreSQL server port.
+	Port int16 `json:"port,omitempty"`
 
-        // AdminUser is PostgreSQL user to connect target server.
-        AdminUser Secret `json:"adminUser"`
+	// AdminUser is PostgreSQL user to connect target server.
+	AdminUser Secret `json:"adminUser"`
 
-        // AdminPassword is PostgreSQL password to connect target server.
-        AdminPassword Secret `json:"adminPassword"`
+	// AdminPassword is PostgreSQL password to connect target server.
+	AdminPassword Secret `json:"adminPassword"`
 }
 
 // PostgreSQLStatus defines the observed state of PostgreSQL
 type PostgreSQLStatus struct {
-        // true if successfully connected to the PostgreSQL server
-        Connected bool `json:"connected,omitempty"`
+	// true if successfully connected to the PostgreSQL server
+	Connected bool `json:"connected,omitempty"`
 
 	// Reason for connection failure
 	Reason string `json:"reason,omitempty"`
 
 	//+kubebuilder:default=0
 
-        // The number of users in this PostgreSQL
-        UserCount int32 `json:"userCount"`
+	// The number of users in this PostgreSQL
+	UserCount int32 `json:"userCount"`
 
 	//+kubebuilder:default=0
 
-        // The number of database in this PostgreSQL
-        DBCount int32 `json:"dbCount"`
+	// The number of database in this PostgreSQL
+	DBCount int32 `json:"dbCount"`
 }
 
 //+kubebuilder:object:root=true
@@ -70,24 +70,24 @@ type PostgreSQLStatus struct {
 
 // PostgreSQL is the Schema for the postgreses API
 type PostgreSQL struct {
-        metav1.TypeMeta   `json:",inline"`
-        metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-        Spec   PostgreSQLSpec   `json:"spec,omitempty"`
-        Status PostgreSQLStatus `json:"status,omitempty"`
+	Spec   PostgreSQLSpec   `json:"spec,omitempty"`
+	Status PostgreSQLStatus `json:"status,omitempty"`
 }
 
 func (m PostgreSQL) GetKey() string {
-        return fmt.Sprintf("%s-%s", m.Namespace, m.Name)
+	return fmt.Sprintf("%s-%s", m.Namespace, m.Name)
 }
 
 //+kubebuilder:object:root=true
 
 // PostgreSQLList contains a list of PostgreSQL
 type PostgreSQLList struct {
-        metav1.TypeMeta `json:",inline"`
-        metav1.ListMeta `json:"metadata,omitempty"`
-        Items           []PostgreSQL `json:"items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []PostgreSQL `json:"items"`
 }
 
 type Secret struct {
@@ -101,5 +101,5 @@ type Secret struct {
 }
 
 func init() {
-        SchemeBuilder.Register(&PostgreSQL{}, &PostgreSQLList{})
+	SchemeBuilder.Register(&PostgreSQL{}, &PostgreSQLList{})
 }

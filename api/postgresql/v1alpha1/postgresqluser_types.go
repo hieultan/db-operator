@@ -23,14 +23,14 @@ import (
 // PostgreSQLUserSpec defines the desired state of PostgreSQLUser
 type PostgreSQLUserSpec struct {
 
-        // PostgreSQL (CRD) name to reference to, which decides the destination PostgreSQL server
-        PostgresqlName string `json:"postgresqlName"`
+	// PostgreSQL (CRD) name to reference to, which decides the destination PostgreSQL server
+	PostgresqlName string `json:"postgresqlName"`
 
 	// +kubebuilder:default=%
 	// +kubebuilder:validation:Optional
 
-        // PostgreSQL hostname for the account
-        Host string `json:"host"`
+	// PostgreSQL hostname for the account
+	Host string `json:"host"`
 }
 
 // PostgreSQLUserStatus defines the observed state of PostgreSQLUser
@@ -46,8 +46,8 @@ type PostgreSQLUserStatus struct {
 
 	// +kubebuilder:default=false
 
-        // true if PostgreSQL user is created
-        PostgreSQLUserCreated bool `json:"postgresql_user_created,omitempty"`
+	// true if PostgreSQL user is created
+	PostgreSQLUserCreated bool `json:"postgresql_user_created,omitempty"`
 
 	// +kubebuilder:default=false
 
@@ -56,11 +56,11 @@ type PostgreSQLUserStatus struct {
 }
 
 func (m *PostgreSQLUser) GetConditions() []metav1.Condition {
-        return m.Status.Conditions
+	return m.Status.Conditions
 }
 
 func (m *PostgreSQLUser) SetConditions(conditions []metav1.Condition) {
-        m.Status.Conditions = conditions
+	m.Status.Conditions = conditions
 }
 
 //+kubebuilder:object:root=true
@@ -72,22 +72,22 @@ func (m *PostgreSQLUser) SetConditions(conditions []metav1.Condition) {
 
 // PostgreSQLUser is the Schema for the postgresqlusers API
 type PostgreSQLUser struct {
-        metav1.TypeMeta   `json:",inline"`
-        metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-        Spec   PostgreSQLUserSpec   `json:"spec,omitempty"`
-        Status PostgreSQLUserStatus `json:"status,omitempty"`
+	Spec   PostgreSQLUserSpec   `json:"spec,omitempty"`
+	Status PostgreSQLUserStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
 // PostgreSQLUserList contains a list of PostgreSQLUser
 type PostgreSQLUserList struct {
-        metav1.TypeMeta `json:",inline"`
-        metav1.ListMeta `json:"metadata,omitempty"`
-        Items           []PostgreSQLUser `json:"items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []PostgreSQLUser `json:"items"`
 }
 
 func init() {
-        SchemeBuilder.Register(&PostgreSQLUser{}, &PostgreSQLUserList{})
+	SchemeBuilder.Register(&PostgreSQLUser{}, &PostgreSQLUserList{})
 }

@@ -25,14 +25,14 @@ import (
 // PostgreSQLDBSpec defines the desired state of PostgreSQLDB
 type PostgreSQLDBSpec struct {
 
-        // PostgreSQL (CRD) name to reference to, which decides the destination PostgreSQL server
-        PostgresqlName string `json:"postgresqlName"`
+	// PostgreSQL (CRD) name to reference to, which decides the destination PostgreSQL server
+	PostgresqlName string `json:"postgresqlName"`
 
-        // PostgreSQL Database name
-        DBName string `json:"dbName"`
+	// PostgreSQL Database name
+	DBName string `json:"dbName"`
 
-        // PostgreSQL Database Schema Migrations from GitHub
-        SchemaMigrationFromGitHub *GitHubConfig `json:"schemaMigrationFromGitHub,omitempty"`
+	// PostgreSQL Database Schema Migrations from GitHub
+	SchemaMigrationFromGitHub *GitHubConfig `json:"schemaMigrationFromGitHub,omitempty"`
 }
 
 // PostgreSQLDBStatus defines the observed state of PostgreSQLDB
@@ -58,12 +58,12 @@ type PostgreSQLDB struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-        Spec   PostgreSQLDBSpec   `json:"spec,omitempty"`
-        Status PostgreSQLDBStatus `json:"status,omitempty"`
+	Spec   PostgreSQLDBSpec   `json:"spec,omitempty"`
+	Status PostgreSQLDBStatus `json:"status,omitempty"`
 }
 
 func (m PostgreSQLDB) GetKey() string {
-        return fmt.Sprintf("%s-%s-%s", m.Namespace, m.Spec.PostgresqlName, m.Spec.DBName)
+	return fmt.Sprintf("%s-%s-%s", m.Namespace, m.Spec.PostgresqlName, m.Spec.DBName)
 }
 
 //+kubebuilder:object:root=true
@@ -72,7 +72,7 @@ func (m PostgreSQLDB) GetKey() string {
 type PostgreSQLDBList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-        Items           []PostgreSQLDB `json:"items"`
+	Items           []PostgreSQLDB `json:"items"`
 }
 
 // GitHubConfig holds GitHub repo, path, and ref for Data Migration
@@ -100,5 +100,5 @@ type SchemaMigration struct {
 }
 
 func init() {
-        SchemeBuilder.Register(&PostgreSQLDB{}, &PostgreSQLDBList{})
+	SchemeBuilder.Register(&PostgreSQLDB{}, &PostgreSQLDBList{})
 }
